@@ -73,7 +73,7 @@ class DefinitionTree:
                 helper.indent()
                 print(f"{helper.spaces()}Type: {item[1]},")
                 print(f"{helper.spaces()}ID: {item[2]},")
-                print(f"{helper.spaces()}Parameters: {item[3][0]},")
+                print(f"{helper.spaces()}Parameters: ({DefinitionTree.printParams(item[3][0])}),")
                 print(f"{helper.spaces()}Body: {item[3][1]}")
                 helper.outdent()
                 print(f"{helper.spaces()})")
@@ -82,8 +82,18 @@ class DefinitionTree:
         print(f"{helper.spaces()}]")
         pass
 
+    def printParams(paramList):
+        string = ""
+        for count, item in enumerate(paramList):
+            string += f"{item[0]}"
+            string += " "
+            string += f"{item[1]}"
+            if count != len(paramList)-1:
+                string += ", "
+        return string
+
 class StatementTree:
-    def createStatementTree(prod):
+    def createStatementTree(prod, tree):
         statement = ""
         match(prod):
             case productions.prBreak:
@@ -92,8 +102,13 @@ class StatementTree:
                 statement = "newLineState()"
             case productions.prNull:
                 statement = "nullState()"
+            case productions.prFuncBody:
+                statement = "blockState()"
 
         return statement
+    
+    def printStateAST(tree):
+        pass
 
 class ExpressionTree:
     def createExpressionTree(prod):

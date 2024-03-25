@@ -71,28 +71,35 @@ def FunctionDefinition():
 
 def FunctionHeader():
     helper.entering("Function Header", debug)
+    params = []
     if activeToken != tokens.RIGHTPAREN:
-        FormalParamList()
+        params = FormalParamList()
         helper.accept(activeToken, tokens.RIGHTPAREN)
     else:
         helper.accept(activeToken, tokens.RIGHTPAREN)
     helper.exiting("Function Header", debug)
+    return params
 
 def FunctionBody():
     helper.entering("Function Body", debug)
+    body = []
     loadToken()
     helper.accept(activeToken, tokens.LEFTCURLY)
-    CompoundStatement()
+    body.append(CompoundStatement())
     helper.exiting("Function Body", debug)
+    return body
 
 def FormalParamList():
     helper.entering("Formal Parameter List", debug)
+    params = []
     while(activeToken != tokens.RIGHTPAREN):
-       Type()
-       loadToken()
-       if activeToken == tokens.COMMA:
+        ID, var = Type()
+        loadToken()
+        params.append([ID, var])
+        if activeToken == tokens.COMMA:
            loadToken()
     helper.exiting("Formal Parameter List", debug)
+    return params
 
 def Statement():
     helper.entering("Statement", debug)
@@ -140,6 +147,7 @@ def breakStatement():
 
 def CompoundStatement():
     helper.entering("Compound Statement", debug)
+    statementList = []
     loadToken()
     while(activeToken != tokens.RIGHTCURLY):
         if(activeToken == tokens.INT or activeToken == tokens.CHAR):
@@ -154,6 +162,7 @@ def CompoundStatement():
     
     helper.accept(activeToken, tokens.RIGHTCURLY)
     helper.exiting("Compound Statement", debug)
+    return
 
 def ifStatement():
     helper.entering("If Statement", debug)
