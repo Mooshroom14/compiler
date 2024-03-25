@@ -42,34 +42,12 @@ def accept(loaded, token):
     else:
         #print(f"Token Accepted: {loaded}")
         return True
-
-# def isStatement(activeToken, tokens):
-#     match(activeToken):
-#         case tokens.IF:
-#             return True
-#         case tokens.RETURN:
-#             return True
-#         case tokens.BREAK:
-#             return True
-#         case tokens.LEFTCURLY:
-#             return True
-#         case tokens.SEMICOLON:
-#             return True
-#         case tokens.WHILE:
-#             return True
-#         case tokens.READ:
-#             return True
-#         case tokens.WRITE:
-#             return True
-#         case tokens.NEWLINE:
-#             return True
         
 def errorSpaces(val):
     final = ""
     numSpaces = ((currPos) - 1) + 3
     for i in range(0,numSpaces):
         final += " "
-    
     return final
 
 def getTokenVal(tok):

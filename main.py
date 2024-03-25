@@ -1,8 +1,6 @@
 import argparse 
-import sys
-from FileScanner import Lexeme
-from FileParser import helper
 from FileParser import productions
+from AbstractSyntax import Trees
 
 def printHelp():
     print("Usage: python3 [classpath] parser.tc [options] toyc_source_file")
@@ -37,12 +35,11 @@ def main():
     parser.add_argument("-version", action="store_true", help="display the program version")
 
     args = parser.parse_args()
-    tokens = []
 
-    print("part2: Nathan Germain\n")
+    print("part2: Nathan Germain")
 
     if args.version:
-        print("Program Version: v1\n")
+        print("Program Version: v1")
 
     if args.help:
         printHelp()
@@ -51,6 +48,8 @@ def main():
 
         productions.setup(codeFile, args.debug)
         astProgram = productions.Program()
+        if args.abstract:
+            Trees.ProgramTree.printAST(astProgram, args.filename)
 
 
 if __name__ == "__main__":

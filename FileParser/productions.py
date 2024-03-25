@@ -28,20 +28,22 @@ def Program():
         loadToken()
     helper.accept(activeToken, tokens.EOF)
     helper.exiting("Program", debug)
-    print("[PARSER] Successful Parse!")
+    if debug == 0 or debug == 2:
+        print("[PARSER] Successful Parse!")
     return Trees.ProgramTree.createProgramTree(defList)
 
 def definition():
     helper.entering("Definition", debug)
-    ID = Type()
+    ID, value = Type()
     loadToken()
     if (activeToken == tokens.LEFTPAREN):
         loadToken()
-        prod = FunctionDefinition()
+        prod = Trees.productions.prFuncDef
+        funcDefTree = FunctionDefinition()
     elif (activeToken == tokens.SEMICOLON):
         prod = None
     helper.exiting("Definition", debug)
-    return Trees.DefinitionTree.createDefinitionTree(ID, prod)
+    return Trees.DefinitionTree.createDefinitionTree(ID, prod, value, funcDefTree)
 
 def Type():
     helper.entering("Type", debug)
@@ -56,15 +58,16 @@ def Type():
     else:
         print("ERROR: Illegal Type!")
         sys.exit()
+    val = currTokenVal
     helper.exiting("Type", debug)
-    return prod
+    return prod,val
 
 def FunctionDefinition():
     helper.entering("Function Definition", debug)
     header = FunctionHeader()
     body = FunctionBody()
     helper.exiting("Function Definition", debug)
-    return header,body
+    return [header,body]
 
 def FunctionHeader():
     helper.entering("Function Header", debug)
@@ -139,7 +142,6 @@ def CompoundStatement():
     helper.entering("Compound Statement", debug)
     loadToken()
     while(activeToken != tokens.RIGHTCURLY):
-        print(f"Current Token (Statement): {activeToken}")
         if(activeToken == tokens.INT or activeToken == tokens.CHAR):
             loadToken()
             helper.accept(activeToken, tokens.ID)
