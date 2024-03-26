@@ -103,39 +103,45 @@ def FormalParamList():
 
 def Statement():
     helper.entering("Statement", debug)
+    tree = []
     match(activeToken):
         case tokens.IF:
-            prod = ifStatement()
+            prod = Trees.productions.prIf
+            tree.append(ifStatement())
         case tokens.RETURN:
-            prod = ReturnStatement()
+            prod = Trees.productions.prReturn
+            tree.append(ReturnStatement())
         case tokens.BREAK:
-            prod = breakStatement()
+            prod = Trees.productions.prBreak
+            tree.append(breakStatement())
         case tokens.LEFTCURLY:
-            prod = CompoundStatement()
+            prod = Trees.productions.prCompound
+            tree.append(CompoundStatement())
         case tokens.SEMICOLON:
-            prod = NullStatement()
+            prod = Trees.productions.prNull
+            tree.append(NullStatement())
         case tokens.WHILE:
-            prod = WhileStatement()
+            prod = Trees.productions.prWhile
+            tree.append(WhileStatement())
         case tokens.READ:
-            prod = ReadStatement()
+            prod = Trees.productions.prRead
+            tree.append(ReadStatement())
         case tokens.WRITE:
-            prod = WriteStatement()
+            prod = Trees.productions.prWrite
+            tree.append(WriteStatement())
         case tokens.NEWLINE:
-            prod = newLineStatement()
-        case tokens.SEMICOLON:
-            prod = NullStatement()
+            prod = Trees.productions.prNewline
+            tree.append(newLineStatement())
         case _:
-            prod = ExpressionStatement()
+            prod = Trees.productions.prExprStatement
+            tree.append(ExpressionStatement())
     helper.exiting("Statement", debug)
-    return Trees.StatementTree.createStatementTree(prod)
+    return Trees.StatementTree.createStatementTree(prod, tree)
 
 def ExpressionStatement():
     helper.entering("Expression Statement", debug)
     Expression()
-    if activeToken == tokens.LEFTBRACKET:
-        CompoundStatement()
-    else:
-        helper.accept(activeToken, tokens.SEMICOLON)
+    helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Expression Statement", debug)
 
 def breakStatement():
@@ -143,7 +149,7 @@ def breakStatement():
     loadToken()
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Break Statement", debug)
-    return Trees.productions.prBreak
+    return "break"
 
 def CompoundStatement():
     helper.entering("Compound Statement", debug)
@@ -151,10 +157,10 @@ def CompoundStatement():
     loadToken()
     while(activeToken != tokens.RIGHTCURLY):
         if(activeToken == tokens.INT or activeToken == tokens.CHAR):
-            loadToken()
-            helper.accept(activeToken, tokens.ID)
+            ID, value = Type()
             loadToken()
             helper.accept(activeToken, tokens.SEMICOLON)
+            statementList.append(["varDef", ID, value])
             loadToken()
         else:
             Statement()
@@ -182,7 +188,7 @@ def ifStatement():
 def NullStatement():
     helper.entering("Null Statement", debug)
     helper.exiting("Null Statement", debug)
-    return Trees.productions.prNull
+    return "null"
 
 def ReturnStatement():
     helper.entering("Return Statement", debug)
@@ -228,7 +234,7 @@ def newLineStatement():
     loadToken()
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Newline Statement", debug)
-    return Trees.productions.prNewline
+    return "newline"
 
 def Expression():
     helper.entering("Expression", debug)
