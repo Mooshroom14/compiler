@@ -126,7 +126,7 @@ class StatementTree:
     
     def printStateAST(tree):
         for item in tree:
-            print(item)
+            #print(item)
             print(f"{helper.spaces()}{item[0]} ", end = "")
             if item[0] == "blockState()":
                 print("[")
@@ -139,7 +139,10 @@ class StatementTree:
                 helper.indent()
                 print(f"{helper.spaces()}Condition: {ExpressionTree.printExprAST(item[1][0])}")
                 print(f"{helper.spaces()}Do: ")
+                helper.indent()
+                print(item[1][1])
                 StatementTree.printStateAST(item[1][1])
+                helper.outdent()
                 if item[1][2] != None:
                     print(f"{helper.spaces()}Else: ")
                     StatementTree.printStateAST(item[1][2])
@@ -150,8 +153,12 @@ class StatementTree:
                 helper.outdent()
                 print(f"{helper.spaces()})")
             if item[0] == "returnState()":
+                print(item)
                 if item[1] != None:
                     ExpressionTree.printExprAST(item[1])
+            if item[0] == "exprState()":
+                helper.indent()
+                ExpressionTree.printExprAST(item[1])
 
 class ExpressionTree:
     def createExpressionTree(prod, tree):
@@ -177,8 +184,29 @@ class ExpressionTree:
         return statement
     
     def printExprAST(tree):
+        print(f"Length of tree: {len(tree)}")
+        print(f"{tree}")
+        string = ""
+        print(f"1st: {tree[0]}")
         if tree[0] == "expr()":
-            return f"({tree[1]})"
+            print(len(tree[1]))
+            if len(tree[1]) == 2:
+                string += ExpressionTree.printExprAST(tree[1])
+        elif tree[0] == "ID":
+            string += f"ID: {tree[1]}"
+        elif tree[0] == "Number":
+            string += f"Number: {tree[1]}"
+        elif tree[0] == "Operator":
+            string += f"Operator: {tree[1]}"
+        elif tree[0] == "CharLiteral":
+            string += f"Char Literal: {tree[1]}"
+        elif tree[0] == "StringLiteral":
+            string += f"String: {tree[1]}"
+        else:
+            string += ExpressionTree.printExprAST(tree[0])
+        
+        return string
+        
 
 class OperatorTree:
     def Operator(op):

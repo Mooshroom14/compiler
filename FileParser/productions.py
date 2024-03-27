@@ -106,34 +106,34 @@ def Statement():
     match(activeToken):
         case tokens.IF:
             prod = Trees.productions.prIf
-            tree.append(ifStatement())
+            tree = ifStatement()
         case tokens.RETURN:
             prod = Trees.productions.prReturn
-            tree.append(ReturnStatement())
+            tree = ReturnStatement()
         case tokens.BREAK:
             prod = Trees.productions.prBreak
-            tree.append(breakStatement())
+            tree = breakStatement()
         case tokens.LEFTCURLY:
             prod = Trees.productions.prCompound
-            tree.append(CompoundStatement())
+            tree = CompoundStatement()
         case tokens.SEMICOLON:
             prod = Trees.productions.prNull
-            tree.append(NullStatement())
+            tree = NullStatement()
         case tokens.WHILE:
             prod = Trees.productions.prWhile
-            tree.append(WhileStatement())
+            tree = WhileStatement()
         case tokens.READ:
             prod = Trees.productions.prRead
-            tree.append(ReadStatement())
+            tree = ReadStatement()
         case tokens.WRITE:
             prod = Trees.productions.prWrite
-            tree.append(WriteStatement())
+            tree = WriteStatement()
         case tokens.NEWLINE:
             prod = Trees.productions.prNewline
-            tree.append(newLineStatement())
+            tree = newLineStatement()
         case _:
             prod = Trees.productions.prExprStatement
-            tree.append(ExpressionStatement())
+            tree = ExpressionStatement()
     helper.exiting("Statement", debug)
     return Trees.StatementTree.createStatementTree(prod, tree)
 
@@ -187,7 +187,7 @@ def ifStatement():
     else:
         ifTree.append(None)
     helper.exiting("If Statement", debug)
-    print(ifTree)
+    #print(ifTree)
     return ifTree
 
 def NullStatement():
@@ -205,17 +205,28 @@ def ReturnStatement():
 
 def WhileStatement():
     helper.entering("While Statement", debug)
+    tree = []
     loadToken()
     helper.accept(activeToken, tokens.LEFTPAREN)
     loadToken()
-    Expression()
+    tree.append(Expression())
     helper.accept(activeToken, tokens.RIGHTPAREN)
     loadToken()
-    Statement()
+    tree.append(Statement())
     helper.exiting("While Statement", debug)
+    return tree
 
 def ReadStatement():
     helper.entering("Read Statement", debug)
+    loadToken()
+    helper.accept(activeToken, tokens.LEFTPAREN)
+    loadToken()
+    while activeToken != tokens.RIGHTPAREN:
+        ID = activeToken
+        loadToken()
+        if activeToken == tokens.COMMA:
+            loadToken()
+    helper.accept(activeToken, tokens.RIGHTPAREN)
     loadToken()
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Read Statement", debug)
@@ -266,7 +277,6 @@ def SimpleExpression():
     helper.entering("Simple Expression", debug)
     tree = []
     tree.append(Term())
-    #loadToken()
     if activeToken == tokens.ADDOP:
         tree.append(Trees.OperatorTree.Operator(currTokenVal))
         loadToken()
@@ -294,32 +304,32 @@ def Primary():
     match(activeToken):
         case tokens.LEFTPAREN:
             loadToken()
-            tree.append(Expression())
+            tree = Expression()
             helper.accept(activeToken, tokens.RIGHTPAREN)
             loadToken()
         case tokens.ID:
             ID = currTokenVal
             loadToken()
             if activeToken == tokens.LEFTPAREN:
-                tree.append(["funcCall()", ID, FunctionCall()])
+                tree = ["funcCall()", ID, FunctionCall()]
                 helper.accept(activeToken, tokens.RIGHTPAREN)
             else:
                 prod = Trees.productions.terID
-                tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
+                tree = Trees.ExpressionTree.createExpressionTree(prod, ID)
         case tokens.NOT:
             loadToken()
-            tree.append(["not()", Primary()])   
+            tree = ["not()", Primary()] 
         case tokens.NUMBER:
             prod = Trees.productions.terNum
-            tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
+            tree = Trees.ExpressionTree.createExpressionTree(prod, currTokenVal)
             loadToken()
         case tokens.STRING:
             prod = Trees.productions.terStringLit
-            tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
+            tree = Trees.ExpressionTree.createExpressionTree(prod, currTokenVal)
             loadToken()
         case tokens.CHARLITERAL:
             prod = Trees.productions.terCharLit
-            tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
+            tree = Trees.ExpressionTree.createExpressionTree(prod, currTokenVal)
             loadToken()
         
     if currTokenVal == "-":
