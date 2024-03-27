@@ -79,7 +79,8 @@ def printDefAST(defAST):
             print(f"{helper.spaces()}Parameters: ({printParams(item[3][0])}),")
             print(f"{helper.spaces()}Body [")
             helper.indent()
-            printStateAST(item[3][1])
+            for i in item[3][1]:
+                printStateAST(i)
             helper.outdent()
             print(f"{helper.spaces()}]")
             helper.outdent()
@@ -127,44 +128,68 @@ def createStatementTree(prod, tree):
     return statement
 
 def printStateAST(tree):
-    for item in tree:
-        #print(item)
-        print(f"{helper.spaces()}{item[0]} ", end = "")
-        if item[0] == "blockState()":
-            print("[")
-            helper.indent()
-            printStateAST(item[1])
+    print(f"{helper.spaces()}{tree[0]} ", end = "")
+    if tree[0] == "blockState()":
+        print("[")
+        helper.indent()
+        for item in tree[1]:
+            printStateAST(item)
+        helper.outdent()
+        print(f"\n{helper.spaces()}]")
+    if tree[0] == "ifState()":
+        print("[")
+        helper.indent()
+        print(f"{helper.spaces()}Condition: (")
+        helper.indent()
+        printExprAST([tree[1][0]])
+        helper.outdent()
+        print(f"{helper.spaces()}Do: ")
+        helper.indent()
+        #print(item[1][1])
+        printStateAST(tree[1][1])
+        if tree[1][2] != None:
             helper.outdent()
-            print(f"\n{helper.spaces()}]")
-        if item[0] == "ifState()":
-            print("[")
+            print(f"{helper.spaces()}Else: ")
             helper.indent()
-            print(f"{helper.spaces()}Condition: (")
+            printStateAST(tree[1][2])
+        helper.outdent()
+    if tree[0] == "varDef":
+        print("(")
+        helper.indent()
+        print(f"{helper.spaces()}Type: {tree[1]}, ID: {tree[2]}")
+        helper.outdent()
+        print(f"{helper.spaces()})")
+    if tree[0] == "returnState()":
+        if tree[1] != None:
+            print(" [")
             helper.indent()
-            printExprAST([item[1][0]])
+            printExprAST(tree[1])
             helper.outdent()
-            print(f"{helper.spaces()}Do: ")
-            helper.indent()
-            print(item[1][1])
-            printStateAST(item[1][1])
-            helper.outdent()
-            if item[1][2] != None:
-                print(f"{helper.spaces()}Else: ")
-                printStateAST(item[1][2])
-        if item[0] == "varDef":
-            print("(")
-            helper.indent()
-            print(f"{helper.spaces()}Type: {item[1]}, ID: {item[2]}")
-            helper.outdent()
-            print(f"{helper.spaces()})")
-        if item[0] == "returnState()":
-            print(item)
-            if item[1] != None:
-                printExprAST(item[1])
-        if item[0] == "exprState()":
-            helper.indent()
-            printExprAST(item[1])
-            helper.outdent()
+            print(f"{helper.spaces()}]")
+    if tree[0] == "exprState()":
+        helper.indent()
+        print("[")
+        printExprAST(tree[1])
+        print(f"{helper.spaces()}]")
+        helper.outdent()
+    if tree[0] == "whileState()":
+        print(" [")
+        helper.indent()
+        print(f"{helper.spaces()}Condition: ")
+        printExprAST(tree[1][0])
+        print(f"{helper.spaces()}Do: ")
+        helper.indent()
+        printStateAST(tree[1][1])
+        helper.outdent()
+    if tree[0] == "writeState()":
+        print(" [")
+        helper.indent()
+        printExprAST(tree[1])
+        helper.outdent()
+        print(f"{helper.spaces()}]")
+    if tree[0] == "newLineState()":
+        print("")
+        
 
 
 def createExpressionTree(prod, tree):
@@ -209,6 +234,17 @@ def printExprAST(tree):
         print(f"{helper.spaces()}Char Literal: {tree[1]} ")
     elif tree[0] == "StringLiteral":
         print(f"{helper.spaces()}String: {tree[1]} ")  
+    elif tree[0] == "funcCall()":
+        print(f"{helper.spaces()}Function Call( ")
+        helper.indent()
+        print(f"{helper.spaces()}ID: {tree[1]}")
+        print(f"{helper.spaces()}Parameters: ")
+        helper.indent()
+        printExprAST(tree[2])
+        helper.outdent()
+        helper.outdent()
+        print(f"{helper.spaces()})")
+
     else:
         printExprAST(tree[0])          
 #helper.outdent()

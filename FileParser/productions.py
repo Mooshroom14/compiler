@@ -198,7 +198,10 @@ def NullStatement():
 def ReturnStatement():
     helper.entering("Return Statement", debug)
     loadToken()
-    tree = Expression()
+    if activeToken != tokens.SEMICOLON:
+        tree = Expression()
+    else:
+        tree = None
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Return Statement", debug)
     return tree
@@ -237,12 +240,12 @@ def WriteStatement():
     loadToken()
     helper.accept(activeToken, tokens.LEFTPAREN)
     loadToken()
-    ActualParameters()
+    tree = ActualParameters()
     helper.accept(activeToken, tokens.RIGHTPAREN)
     loadToken()
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Write Statement", debug)
-    return Trees.productions.prWrite
+    return tree
 
 def newLineStatement():
     helper.entering("Newline Statement", debug)
