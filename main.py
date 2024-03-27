@@ -46,10 +46,25 @@ def main():
     else:
         codeFile = open(args.filename, "r")  
 
+        if args.verbose:
+            args.abstract = True
+            args.debug = 0
+
         productions.setup(codeFile, args.debug)
         astProgram = productions.Program()
         if args.abstract:
             Trees.printAST(astProgram, args.filename)
+
+        codeFile.close()
+
+        if args.verbose:
+            with open(args.filename, 'r') as file:
+                lines = file.readlines()
+            for line in lines:
+                print(line.strip())  
+
+
+            
 
 
 if __name__ == "__main__":

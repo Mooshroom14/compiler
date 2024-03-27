@@ -36,12 +36,18 @@ def accept(loaded, token):
         if currLineText[len(currLineText)-1] == "\n":
             currLineText = currLineText[:len(currLineText)-2]
         print(f"{currLine}: {currLineText}")
-        print(f"{errorSpaces(value)}^ '{getTokenVal(token)}' expected")
-        #print(f"Syntax Error! Expected a {token}")
+        print(f"{spaces}^ '{getTokenVal(token)}' expected")
         sys.exit()
     else:
-        #print(f"Token Accepted: {loaded}")
         return True
+    
+def printTypeError():
+    spaces = errorSpaces(value)
+    if currLineText[len(currLineText)-1] == "\n":
+        currLineText = currLineText[:len(currLineText)-2]
+    print(f"{currLine}: {currLineText}")
+    print(f"{spaces}^ int or char expected")
+    sys.exit()
         
 def errorSpaces(val):
     final = ""

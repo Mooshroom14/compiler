@@ -56,7 +56,7 @@ def Type():
         loadToken()
         helper.accept(activeToken, tokens.ID)
     else:
-        print("ERROR: Illegal Type!")
+        helper.printTypeError()
         sys.exit()
     val = currTokenVal
     helper.exiting("Type", debug)

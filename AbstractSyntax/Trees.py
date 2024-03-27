@@ -63,7 +63,6 @@ def createDefinitionTree(ID, prod, value, tree):
 def printDefAST(defAST):
     print(f"{helper.spaces()}Definition [")
     helper.indent()
-    #print(f"{len(defAST)}")
     for item in defAST:
         if item[0] == "varDef":
             print(f"{helper.spaces()}varDef (")
@@ -139,7 +138,7 @@ def printStateAST(tree):
     if tree[0] == "ifState()":
         print("[")
         helper.indent()
-        print(f"{helper.spaces()}Condition: (")
+        print(f"{helper.spaces()}Condition: ")
         helper.indent()
         printExprAST([tree[1][0]])
         helper.outdent()
@@ -160,8 +159,8 @@ def printStateAST(tree):
         helper.outdent()
         print(f"{helper.spaces()})")
     if tree[0] == "returnState()":
+        print(" [")
         if tree[1] != None:
-            print(" [")
             helper.indent()
             printExprAST(tree[1])
             helper.outdent()
@@ -181,6 +180,7 @@ def printStateAST(tree):
         helper.indent()
         printStateAST(tree[1][1])
         helper.outdent()
+        print(f"{helper.spaces()}]")
     if tree[0] == "writeState()":
         print(" [")
         helper.indent()
@@ -189,8 +189,14 @@ def printStateAST(tree):
         print(f"{helper.spaces()}]")
     if tree[0] == "newLineState()":
         print("")
-        
-
+    if tree[0] == "breakState()":
+        print("")
+    if tree[0] == "readState()":
+        print(" [")
+        helper.indent()
+        printExprAST(tree[1])
+        helper.outdent()
+        print(f"{helper.spaces()}]")
 
 def createExpressionTree(prod, tree):
     statement = ""
@@ -215,7 +221,6 @@ def createExpressionTree(prod, tree):
     return statement
 
 def printExprAST(tree):
-    #helper.indent()
     if tree[0] == "expr()":
         if len(tree[1]) == 3:
             helper.indent()
@@ -244,10 +249,10 @@ def printExprAST(tree):
         helper.outdent()
         helper.outdent()
         print(f"{helper.spaces()})")
-
+    elif tree[0] == "minus()" or tree[0] == "not()":
+        printExprAST(tree[1])
     else:
         printExprAST(tree[0])          
-#helper.outdent()
 
 def Operator(op):
     return ["Operator", op]
