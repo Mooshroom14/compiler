@@ -6,7 +6,7 @@ class productions(Enum):
     prType = 1
     prFuncDef = 2
     prFuncHead = 3
-    prFuncBody = 4
+   # prFuncBody = 4
     prFormalParams = 5
     prStatement = 6
     prExprStatement = 7
@@ -28,7 +28,11 @@ class productions(Enum):
     prActualParams = 23
     prMinus = 24
     prNot = 25
-
+    terOperator = 26
+    terNum = 27
+    terID = 28
+    terCharLit = 29
+    terStringLit = 30
 
 class ProgramTree:
     def createProgramTree(defList):
@@ -64,8 +68,7 @@ class DefinitionTree:
             if item[0] == "varDef":
                 print(f"{helper.spaces()}varDef (")
                 helper.indent()
-                print(f"{helper.spaces()}Type: {item[1]},")
-                print(f"{helper.spaces()}ID: {item[2]},")
+                print(f"{helper.spaces()}Type: {item[0][1]}, ID: {item[0][2]}")
                 helper.outdent()
                 print(f"{helper.spaces()})")
             elif item[0] == "funcDef":
@@ -74,7 +77,11 @@ class DefinitionTree:
                 print(f"{helper.spaces()}Type: {item[1]},")
                 print(f"{helper.spaces()}ID: {item[2]},")
                 print(f"{helper.spaces()}Parameters: ({DefinitionTree.printParams(item[3][0])}),")
-                print(f"{helper.spaces()}Body: {item[3][1]}")
+                print(f"{helper.spaces()}Body [")
+                helper.indent()
+                StatementTree.printStateAST(item[3][1])
+                helper.outdent()
+                print(f"{helper.spaces()}]")
                 helper.outdent()
                 print(f"{helper.spaces()})")
 
@@ -94,36 +101,77 @@ class DefinitionTree:
 
 class StatementTree:
     def createStatementTree(prod, tree):
-        statement = ""
+        statement = []
         match(prod):
             case productions.prBreak:
-                statement = "breakState()"
+                statement = ["breakState()"]
             case productions.prNewline:
-                statement = "newLineState()"
+                statement = ["newLineState()"]
             case productions.prNull:
-                statement = "nullState()"
-            case productions.prFuncBody:
-                statement = "blockState()"
+                statement = ["nullState()"]
+            case productions.prIf:
+                statement = ["ifState()", tree]
+            case productions.prCompound:
+                statement = ["blockState()", tree]
+            case productions.prReturn:
+                statement = ["returnState()", tree]
+            case productions.prWhile:
+                statement = ["whileState()", tree]
+            case productions.prWrite:
+                statement = ["writeState()", tree] 
+            case productions.prRead:
+                statement = ["readState()", tree]
 
         return statement
     
     def printStateAST(tree):
-        pass
+        for item in tree:
+            print(f"{helper.spaces()}{item[0]} ", end = "")
+            if item[0] == "blockState()":
+                print("[")
+                helper.indent()
+                StatementTree.printStateAST(item[1])
+                helper.outdent()
+                print(f"\n{helper.spaces()}]")
+            if item[0] == "ifState()":
+                print("[")
+                helper.indent()
+                print(f"{helper.spaces()}Condition: {ExpressionTree.printExprAST(item[0][1])}")
+                print(f"{helper.spaces()}Do: {StatementTree.printStateAST(item[0][2])}")
+                if item[0][3] != None:
+                    print(f"{helper.spaces()}Else: {StatementTree.printStateAST(item[0][3])}")
+            if item[0] == "varDef":
+                helper.indent()
+                print("(")
+                print(f"{helper.spaces()}Type: {item[1]}, ID: {item[2]}")
+                helper.outdent()
+                print(f"{helper.spaces()})")
 
 class ExpressionTree:
-    def createExpressionTree(prod):
-        statement = ""
+    def createExpressionTree(prod, tree):
+        statement = []
         match(prod):
             case productions.prFuncCall:
-                statement = "funcCall()"
+                statement = ["funcCall()", tree]
             case productions.prExpression:
-                statement = "expr()"
+                statement = ["expr()", tree]
             case productions.prMinus:
-                statement = "minus()"
+                statement = ["minus()", tree]
             case productions.prNot:
-                statement = "not()"
+                statement = ["not()", tree]
+            case productions.terNum:
+                statement = ["Number", tree]
+            case productions.terCharLit:
+                statement = ["CharLiteral", tree]
+            case productions.terID:
+                statement = ["ID", tree]
+            case productions.terStringLit:
+                statement = ["StringLiteral", tree]
 
         return statement
+    
+    def printExprAST(tree):
+        print(f"{helper.spaces()}{tree[0]}")
 
 class OperatorTree:
     def Operator(op):

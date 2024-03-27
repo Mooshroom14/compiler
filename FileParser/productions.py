@@ -82,10 +82,9 @@ def FunctionHeader():
 
 def FunctionBody():
     helper.entering("Function Body", debug)
-    body = []
     loadToken()
     helper.accept(activeToken, tokens.LEFTCURLY)
-    body.append(CompoundStatement())
+    body = CompoundStatement()
     helper.exiting("Function Body", debug)
     return body
 
@@ -107,7 +106,7 @@ def Statement():
     match(activeToken):
         case tokens.IF:
             prod = Trees.productions.prIf
-            tree.append(ifStatement())
+            tree = ifStatement()
         case tokens.RETURN:
             prod = Trees.productions.prReturn
             tree.append(ReturnStatement())
@@ -140,9 +139,10 @@ def Statement():
 
 def ExpressionStatement():
     helper.entering("Expression Statement", debug)
-    Expression()
+    tree = Expression()
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Expression Statement", debug)
+    return Trees.ExpressionTree.createExpressionTree("expr()", tree)
 
 def breakStatement():
     helper.entering("Break Statement", debug)
@@ -163,27 +163,31 @@ def CompoundStatement():
             statementList.append(["varDef", ID, value])
             loadToken()
         else:
-            Statement()
+            statementList.append(Statement())
             loadToken()
     
     helper.accept(activeToken, tokens.RIGHTCURLY)
     helper.exiting("Compound Statement", debug)
-    return
+    return statementList
 
 def ifStatement():
     helper.entering("If Statement", debug)
+    ifTree = []
     loadToken()
     helper.accept(activeToken, tokens.LEFTPAREN)
     loadToken()
-    Expression()
+    ifTree.append(["expr()", Expression()])
     helper.accept(activeToken, tokens.RIGHTPAREN)
     loadToken()
-    Statement()
+    ifTree.append(Statement())
     loadToken()
     if activeToken == tokens.ELSE:
         loadToken()
-        Statement()
+        ifTree.append(Statement())
+    else:
+        ifTree.append(None)
     helper.exiting("If Statement", debug)
+    return ifTree
 
 def NullStatement():
     helper.entering("Null Statement", debug)
@@ -238,81 +242,111 @@ def newLineStatement():
 
 def Expression():
     helper.entering("Expression", debug)
-    prod = RelopExpression()
+    tree = []
+    tree.append(RelopExpression())
     if activeToken == tokens.ASSIGN:
+        tree.append(Trees.OperatorTree.Operator(currTokenVal))
         loadToken()
-        RelopExpression()
+        tree.append(RelopExpression())
     helper.exiting("Expression", debug)
-    return Trees.ExpressionTree.createExpressionTree(prod)
+    return Trees.ExpressionTree.createExpressionTree(None, tree)
 
 def RelopExpression():
     helper.entering("Relop Expression", debug)
-    SimpleExpression()
+    tree = []
+    tree.append(SimpleExpression())
     if activeToken == tokens.RELOP:
+        tree.append(Trees.OperatorTree.Operator(currTokenVal))
         loadToken()
-        SimpleExpression()
+        tree.append(SimpleExpression())
     helper.exiting("Relop Expression", debug)
+    return Trees.ExpressionTree.createExpressionTree(None, tree)
 
 def SimpleExpression():
     helper.entering("Simple Expression", debug)
-    Term()
+    tree = []
+    tree.append(Term())
     #loadToken()
     if activeToken == tokens.ADDOP:
+        tree.append(Trees.OperatorTree.Operator(currTokenVal))
         loadToken()
-        Term()
+        tree.append(Term())
     helper.exiting("Simple Expression", debug)
+    return tree
 
 def Term():
     helper.entering("Term", debug)
-    Primary()
+    tree = []
+    tree.append(Primary())
     if activeToken == tokens.MULOP:
+        tree.append(Trees.OperatorTree.Operator(currTokenVal))
         loadToken()
-        Primary()
+        tree.append(Primary())
     helper.exiting("Term", debug)
+    return tree
 
 def Primary():
     helper.entering("Primary", debug)
     #loadToken()
+    tree = []
+    ID = ""
+    prod = ""
     match(activeToken):
         case tokens.LEFTPAREN:
             loadToken()
-            Expression()
+            tree.append(Expression())
             helper.accept(activeToken, tokens.RIGHTPAREN)
             loadToken()
         case tokens.ID:
+            ID = currTokenVal
             loadToken()
             if activeToken == tokens.LEFTPAREN:
-                FunctionCall()
+                tree.append(["funcCall()", ID, FunctionCall()])
                 helper.accept(activeToken, tokens.RIGHTPAREN)
+            else:
+                prod = Trees.productions.terID
+                tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
         case tokens.NOT:
             loadToken()
-            Primary()    
+            tree.append(["not()", Primary()])   
         case tokens.NUMBER:
+            prod = Trees.productions.terNum
+            tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
             loadToken()
         case tokens.STRING:
+            prod = Trees.productions.terStringLit
+            tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
             loadToken()
         case tokens.CHARLITERAL:
+            prod = Trees.productions.terCharLit
+            tree.append(Trees.ExpressionTree.createExpressionTree(prod, currTokenVal))
             loadToken()
         
     if currTokenVal == "-":
         loadToken()
-        Primary()
+        tree.append(["minus()", Primary()])
 
     helper.exiting("Primary", debug)
+    return tree
 
 def FunctionCall():
     helper.entering("Function Call", debug)
     loadToken()
     if activeToken != tokens.RIGHTPAREN:
-        ActualParameters()
+        tree = ActualParameters()
+    else:
+        tree = None
     loadToken()
     helper.accept(activeToken, tokens.RIGHTPAREN)
     helper.exiting("Function Call", debug)
+    return tree
 
 def ActualParameters():
     helper.entering("Actual Parameters", debug)
-    Expression()
-    if activeToken == tokens.COMMA:
+    params = []
+    params.append(Expression())
+    while activeToken == tokens.COMMA:
         loadToken()
-        Expression()
+        params.append(Expression())
     helper.exiting("Actual Parameters", debug)
+    return params
