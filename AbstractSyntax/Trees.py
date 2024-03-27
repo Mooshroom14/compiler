@@ -34,181 +34,185 @@ class productions(Enum):
     terCharLit = 29
     terStringLit = 30
 
-class ProgramTree:
-    def createProgramTree(defList):
-        return defList
-    
-    def printAST(ast, codeFile):
-        print("\n<<< Abstract Syntax Tree >>>")
-        print("Program (")
-        helper.indent()
-        print(f"{helper.spaces()}Source Code File: {codeFile}")
-        for item in ast:
-            DefinitionTree.printDefAST(item)
-        helper.outdent()
-        print(")")
-        pass
 
-class DefinitionTree:
-    def createDefinitionTree(ID, prod, value, tree):
-        definition = []
-        match(prod):
-            case productions.prFuncDef:
-                definition.append(["funcDef", ID, value, tree])
-            case None:
-                definition.append(["varDef", ID, value])
+def createProgramTree(defList):
+    return defList
 
-        return definition
-    
-    def printDefAST(defAST):
-        print(f"{helper.spaces()}Definition [")
-        helper.indent()
-        #print(f"{len(defAST)}")
-        for item in defAST:
-            if item[0] == "varDef":
-                print(f"{helper.spaces()}varDef (")
-                helper.indent()
-                print(f"{helper.spaces()}Type: {item[0][1]}, ID: {item[0][2]}")
-                helper.outdent()
-                print(f"{helper.spaces()})")
-            elif item[0] == "funcDef":
-                print(f"{helper.spaces()}funcDef (")
-                helper.indent()
-                print(f"{helper.spaces()}Type: {item[1]},")
-                print(f"{helper.spaces()}ID: {item[2]},")
-                print(f"{helper.spaces()}Parameters: ({DefinitionTree.printParams(item[3][0])}),")
-                print(f"{helper.spaces()}Body [")
-                helper.indent()
-                StatementTree.printStateAST(item[3][1])
-                helper.outdent()
-                print(f"{helper.spaces()}]")
-                helper.outdent()
-                print(f"{helper.spaces()})")
+def printAST(ast, codeFile):
+    print("\n<<< Abstract Syntax Tree >>>")
+    print("Program (")
+    helper.indent()
+    print(f"{helper.spaces()}Source Code File: {codeFile}")
+    for item in ast:
+        printDefAST(item)
+    helper.outdent()
+    print(")")
+    pass
 
-        helper.outdent()
-        print(f"{helper.spaces()}]")
-        pass
 
-    def printParams(paramList):
-        string = ""
-        for count, item in enumerate(paramList):
-            string += f"{item[0]}"
-            string += " "
-            string += f"{item[1]}"
-            if count != len(paramList)-1:
-                string += ", "
-        return string
+def createDefinitionTree(ID, prod, value, tree):
+    definition = []
+    match(prod):
+        case productions.prFuncDef:
+            definition.append(["funcDef", ID, value, tree])
+        case None:
+            definition.append(["varDef", ID, value])
 
-class StatementTree:
-    def createStatementTree(prod, tree):
-        statement = []
-        match(prod):
-            case productions.prBreak:
-                statement = ["breakState()"]
-            case productions.prNewline:
-                statement = ["newLineState()"]
-            case productions.prNull:
-                statement = ["nullState()"]
-            case productions.prIf:
-                statement = ["ifState()", tree]
-            case productions.prCompound:
-                statement = ["blockState()", tree]
-            case productions.prReturn:
-                statement = ["returnState()", tree]
-            case productions.prWhile:
-                statement = ["whileState()", tree]
-            case productions.prWrite:
-                statement = ["writeState()", tree] 
-            case productions.prRead:
-                statement = ["readState()", tree]
+    return definition
 
-        return statement
-    
-    def printStateAST(tree):
-        for item in tree:
-            #print(item)
-            print(f"{helper.spaces()}{item[0]} ", end = "")
-            if item[0] == "blockState()":
-                print("[")
-                helper.indent()
-                StatementTree.printStateAST(item[1])
-                helper.outdent()
-                print(f"\n{helper.spaces()}]")
-            if item[0] == "ifState()":
-                print("[")
-                helper.indent()
-                print(f"{helper.spaces()}Condition: {ExpressionTree.printExprAST(item[1][0])}")
-                print(f"{helper.spaces()}Do: ")
-                helper.indent()
-                print(item[1][1])
-                StatementTree.printStateAST(item[1][1])
-                helper.outdent()
-                if item[1][2] != None:
-                    print(f"{helper.spaces()}Else: ")
-                    StatementTree.printStateAST(item[1][2])
-            if item[0] == "varDef":
-                helper.indent()
-                print("(")
-                print(f"{helper.spaces()}Type: {item[1]}, ID: {item[2]}")
-                helper.outdent()
-                print(f"{helper.spaces()})")
-            if item[0] == "returnState()":
-                print(item)
-                if item[1] != None:
-                    ExpressionTree.printExprAST(item[1])
-            if item[0] == "exprState()":
-                helper.indent()
-                ExpressionTree.printExprAST(item[1])
+def printDefAST(defAST):
+    print(f"{helper.spaces()}Definition [")
+    helper.indent()
+    #print(f"{len(defAST)}")
+    for item in defAST:
+        if item[0] == "varDef":
+            print(f"{helper.spaces()}varDef (")
+            helper.indent()
+            print(f"{helper.spaces()}Type: {item[0][1]}, ID: {item[0][2]}")
+            helper.outdent()
+            print(f"{helper.spaces()})")
+        elif item[0] == "funcDef":
+            print(f"{helper.spaces()}funcDef (")
+            helper.indent()
+            print(f"{helper.spaces()}Type: {item[1]},")
+            print(f"{helper.spaces()}ID: {item[2]},")
+            print(f"{helper.spaces()}Parameters: ({printParams(item[3][0])}),")
+            print(f"{helper.spaces()}Body [")
+            helper.indent()
+            printStateAST(item[3][1])
+            helper.outdent()
+            print(f"{helper.spaces()}]")
+            helper.outdent()
+            print(f"{helper.spaces()})")
 
-class ExpressionTree:
-    def createExpressionTree(prod, tree):
-        statement = []
-        match(prod):
-            case productions.prFuncCall:
-                statement = ["funcCall()", tree]
-            case productions.prExpression:
-                statement = ["expr()", tree]
-            case productions.prMinus:
-                statement = ["minus()", tree]
-            case productions.prNot:
-                statement = ["not()", tree]
-            case productions.terNum:
-                statement = ["Number", tree]
-            case productions.terCharLit:
-                statement = ["CharLiteral", tree]
-            case productions.terID:
-                statement = ["ID", tree]
-            case productions.terStringLit:
-                statement = ["StringLiteral", tree]
+    helper.outdent()
+    print(f"{helper.spaces()}]")
+    pass
 
-        return statement
-    
-    def printExprAST(tree):
-        print(f"Length of tree: {len(tree)}")
-        print(f"{tree}")
-        string = ""
-        print(f"1st: {tree[0]}")
-        if tree[0] == "expr()":
-            print(len(tree[1]))
-            if len(tree[1]) == 2:
-                string += ExpressionTree.printExprAST(tree[1])
-        elif tree[0] == "ID":
-            string += f"ID: {tree[1]}"
-        elif tree[0] == "Number":
-            string += f"Number: {tree[1]}"
-        elif tree[0] == "Operator":
-            string += f"Operator: {tree[1]}"
-        elif tree[0] == "CharLiteral":
-            string += f"Char Literal: {tree[1]}"
-        elif tree[0] == "StringLiteral":
-            string += f"String: {tree[1]}"
+def printParams(paramList):
+    string = ""
+    for count, item in enumerate(paramList):
+        string += f"{item[0]}"
+        string += " "
+        string += f"{item[1]}"
+        if count != len(paramList)-1:
+            string += ", "
+    return string
+
+
+def createStatementTree(prod, tree):
+    statement = []
+    match(prod):
+        case productions.prBreak:
+            statement = ["breakState()"]
+        case productions.prNewline:
+            statement = ["newLineState()"]
+        case productions.prNull:
+            statement = ["nullState()"]
+        case productions.prIf:
+            statement = ["ifState()", tree]
+        case productions.prCompound:
+            statement = ["blockState()", tree]
+        case productions.prReturn:
+            statement = ["returnState()", tree]
+        case productions.prWhile:
+            statement = ["whileState()", tree]
+        case productions.prWrite:
+            statement = ["writeState()", tree] 
+        case productions.prRead:
+            statement = ["readState()", tree]
+        case productions.prExprStatement:
+            statement = ["exprState()", tree]
+
+    return statement
+
+def printStateAST(tree):
+    for item in tree:
+        #print(item)
+        print(f"{helper.spaces()}{item[0]} ", end = "")
+        if item[0] == "blockState()":
+            print("[")
+            helper.indent()
+            printStateAST(item[1])
+            helper.outdent()
+            print(f"\n{helper.spaces()}]")
+        if item[0] == "ifState()":
+            print("[")
+            helper.indent()
+            print(f"{helper.spaces()}Condition: (")
+            helper.indent()
+            printExprAST([item[1][0]])
+            helper.outdent()
+            print(f"{helper.spaces()}Do: ")
+            helper.indent()
+            print(item[1][1])
+            printStateAST(item[1][1])
+            helper.outdent()
+            if item[1][2] != None:
+                print(f"{helper.spaces()}Else: ")
+                printStateAST(item[1][2])
+        if item[0] == "varDef":
+            print("(")
+            helper.indent()
+            print(f"{helper.spaces()}Type: {item[1]}, ID: {item[2]}")
+            helper.outdent()
+            print(f"{helper.spaces()})")
+        if item[0] == "returnState()":
+            print(item)
+            if item[1] != None:
+                printExprAST(item[1])
+        if item[0] == "exprState()":
+            helper.indent()
+            printExprAST(item[1])
+            helper.outdent()
+
+
+def createExpressionTree(prod, tree):
+    statement = ""
+    match(prod):
+        case productions.prFuncCall:
+            statement = ["funcCall()", tree]
+        case productions.prExpression:
+            statement = ["expr()", tree]
+        case productions.prMinus:
+            statement = ["minus()", tree]
+        case productions.prNot:
+            statement = ["not()", tree]
+        case productions.terNum:
+            statement = ["Number", tree]
+        case productions.terCharLit:
+            statement = ["CharLiteral", tree]
+        case productions.terID:
+            statement = ["ID", tree]
+        case productions.terStringLit:
+            statement = ["StringLiteral", tree]
+
+    return statement
+
+def printExprAST(tree):
+    #helper.indent()
+    if tree[0] == "expr()":
+        if len(tree[1]) == 3:
+            helper.indent()
+            for item in tree[1]:
+                printExprAST(item)
+            helper.outdent()
         else:
-            string += ExpressionTree.printExprAST(tree[0])
-        
-        return string
-        
+            printExprAST(tree[1])
+    elif tree[0] == "ID":
+        print(f"{helper.spaces()}ID: {tree[1]} ")
+    elif tree[0] == "Number":
+        print(f"{helper.spaces()}Number: {tree[1]} ")
+    elif tree[0] == "Operator":
+        print(f"{helper.spaces()}Operator: {tree[1]} ")
+    elif tree[0] == "CharLiteral":
+        print(f"{helper.spaces()}Char Literal: {tree[1]} ")
+    elif tree[0] == "StringLiteral":
+        print(f"{helper.spaces()}String: {tree[1]} ")  
+    else:
+        printExprAST(tree[0])          
+#helper.outdent()
 
-class OperatorTree:
-    def Operator(op):
-        return ["Operator", op]
+def Operator(op):
+    return ["Operator", op]
 

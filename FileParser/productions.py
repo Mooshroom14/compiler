@@ -30,7 +30,7 @@ def Program():
     helper.exiting("Program", debug)
     if debug == 0 or debug == 2:
         print("[PARSER] Successful Parse!")
-    return Trees.ProgramTree.createProgramTree(defList)
+    return Trees.createProgramTree(defList)
 
 def definition():
     helper.entering("Definition", debug)
@@ -43,7 +43,7 @@ def definition():
     elif (activeToken == tokens.SEMICOLON):
         prod = None
     helper.exiting("Definition", debug)
-    return Trees.DefinitionTree.createDefinitionTree(ID, prod, value, funcDefTree)
+    return Trees.createDefinitionTree(ID, prod, value, funcDefTree)
 
 def Type():
     helper.entering("Type", debug)
@@ -135,14 +135,14 @@ def Statement():
             prod = Trees.productions.prExprStatement
             tree = ExpressionStatement()
     helper.exiting("Statement", debug)
-    return Trees.StatementTree.createStatementTree(prod, tree)
+    return Trees.createStatementTree(prod, tree)
 
 def ExpressionStatement():
     helper.entering("Expression Statement", debug)
     tree = Expression()
     helper.accept(activeToken, tokens.SEMICOLON)
     helper.exiting("Expression Statement", debug)
-    return Trees.ExpressionTree.createExpressionTree("expr()", tree)
+    return tree
 
 def breakStatement():
     helper.entering("Break Statement", debug)
@@ -255,45 +255,46 @@ def Expression():
     helper.entering("Expression", debug)
     tree = []
     tree.append(RelopExpression())
+    #print(tree)
     if activeToken == tokens.ASSIGN:
-        tree.append(Trees.OperatorTree.Operator(currTokenVal))
+        tree.append(Trees.Operator(currTokenVal))
         loadToken()
         tree.append(RelopExpression())
     helper.exiting("Expression", debug)
-    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
+    return Trees.createExpressionTree(Trees.productions.prExpression, tree)
 
 def RelopExpression():
     helper.entering("Relop Expression", debug)
     tree = []
     tree.append(SimpleExpression())
     if activeToken == tokens.RELOP:
-        tree.append(Trees.OperatorTree.Operator(currTokenVal))
+        tree.append(Trees.Operator(currTokenVal))
         loadToken()
         tree.append(SimpleExpression())
     helper.exiting("Relop Expression", debug)
-    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
+    return Trees.createExpressionTree(Trees.productions.prExpression, tree)
 
 def SimpleExpression():
     helper.entering("Simple Expression", debug)
     tree = []
     tree.append(Term())
     if activeToken == tokens.ADDOP:
-        tree.append(Trees.OperatorTree.Operator(currTokenVal))
+        tree.append(Trees.Operator(currTokenVal))
         loadToken()
         tree.append(Term())
     helper.exiting("Simple Expression", debug)
-    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
+    return Trees.createExpressionTree(Trees.productions.prExpression, tree)
 
 def Term():
     helper.entering("Term", debug)
     tree = []
     tree.append(Primary())
     if activeToken == tokens.MULOP:
-        tree.append(Trees.OperatorTree.Operator(currTokenVal))
+        tree.append(Trees.Operator(currTokenVal))
         loadToken()
         tree.append(Primary())
     helper.exiting("Term", debug)
-    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
+    return Trees.createExpressionTree(Trees.productions.prExpression, tree)
 
 def Primary():
     helper.entering("Primary", debug)
@@ -315,21 +316,21 @@ def Primary():
                 helper.accept(activeToken, tokens.RIGHTPAREN)
             else:
                 prod = Trees.productions.terID
-                tree = Trees.ExpressionTree.createExpressionTree(prod, ID)
+                tree = Trees.createExpressionTree(prod, ID)
         case tokens.NOT:
             loadToken()
             tree = ["not()", Primary()] 
         case tokens.NUMBER:
             prod = Trees.productions.terNum
-            tree = Trees.ExpressionTree.createExpressionTree(prod, currTokenVal)
+            tree = Trees.createExpressionTree(prod, currTokenVal)
             loadToken()
         case tokens.STRING:
             prod = Trees.productions.terStringLit
-            tree = Trees.ExpressionTree.createExpressionTree(prod, currTokenVal)
+            tree = Trees.createExpressionTree(prod, currTokenVal)
             loadToken()
         case tokens.CHARLITERAL:
             prod = Trees.productions.terCharLit
-            tree = Trees.ExpressionTree.createExpressionTree(prod, currTokenVal)
+            tree = Trees.createExpressionTree(prod, currTokenVal)
             loadToken()
         
     if currTokenVal == "-":

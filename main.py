@@ -49,7 +49,7 @@ def main():
         productions.setup(codeFile, args.debug)
         astProgram = productions.Program()
         if args.abstract:
-            Trees.ProgramTree.printAST(astProgram, args.filename)
+            Trees.printAST(astProgram, args.filename)
 
 
 if __name__ == "__main__":
