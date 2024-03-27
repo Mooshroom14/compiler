@@ -106,7 +106,7 @@ def Statement():
     match(activeToken):
         case tokens.IF:
             prod = Trees.productions.prIf
-            tree = ifStatement()
+            tree.append(ifStatement())
         case tokens.RETURN:
             prod = Trees.productions.prReturn
             tree.append(ReturnStatement())
@@ -187,6 +187,7 @@ def ifStatement():
     else:
         ifTree.append(None)
     helper.exiting("If Statement", debug)
+    print(ifTree)
     return ifTree
 
 def NullStatement():
@@ -197,11 +198,10 @@ def NullStatement():
 def ReturnStatement():
     helper.entering("Return Statement", debug)
     loadToken()
-    Expression()
+    tree = Expression()
     helper.accept(activeToken, tokens.SEMICOLON)
-    #loadToken()
     helper.exiting("Return Statement", debug)
-    return Trees.productions.prReturn
+    return tree
 
 def WhileStatement():
     helper.entering("While Statement", debug)
@@ -249,7 +249,7 @@ def Expression():
         loadToken()
         tree.append(RelopExpression())
     helper.exiting("Expression", debug)
-    return Trees.ExpressionTree.createExpressionTree(None, tree)
+    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
 
 def RelopExpression():
     helper.entering("Relop Expression", debug)
@@ -260,7 +260,7 @@ def RelopExpression():
         loadToken()
         tree.append(SimpleExpression())
     helper.exiting("Relop Expression", debug)
-    return Trees.ExpressionTree.createExpressionTree(None, tree)
+    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
 
 def SimpleExpression():
     helper.entering("Simple Expression", debug)
@@ -272,7 +272,7 @@ def SimpleExpression():
         loadToken()
         tree.append(Term())
     helper.exiting("Simple Expression", debug)
-    return tree
+    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
 
 def Term():
     helper.entering("Term", debug)
@@ -283,7 +283,7 @@ def Term():
         loadToken()
         tree.append(Primary())
     helper.exiting("Term", debug)
-    return tree
+    return Trees.ExpressionTree.createExpressionTree(Trees.productions.prExpression, tree)
 
 def Primary():
     helper.entering("Primary", debug)

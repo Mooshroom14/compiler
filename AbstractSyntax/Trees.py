@@ -126,6 +126,7 @@ class StatementTree:
     
     def printStateAST(tree):
         for item in tree:
+            print(item)
             print(f"{helper.spaces()}{item[0]} ", end = "")
             if item[0] == "blockState()":
                 print("[")
@@ -136,16 +137,21 @@ class StatementTree:
             if item[0] == "ifState()":
                 print("[")
                 helper.indent()
-                print(f"{helper.spaces()}Condition: {ExpressionTree.printExprAST(item[0][1])}")
-                print(f"{helper.spaces()}Do: {StatementTree.printStateAST(item[0][2])}")
-                if item[0][3] != None:
-                    print(f"{helper.spaces()}Else: {StatementTree.printStateAST(item[0][3])}")
+                print(f"{helper.spaces()}Condition: {ExpressionTree.printExprAST(item[1][0])}")
+                print(f"{helper.spaces()}Do: ")
+                StatementTree.printStateAST(item[1][1])
+                if item[1][2] != None:
+                    print(f"{helper.spaces()}Else: ")
+                    StatementTree.printStateAST(item[1][2])
             if item[0] == "varDef":
                 helper.indent()
                 print("(")
                 print(f"{helper.spaces()}Type: {item[1]}, ID: {item[2]}")
                 helper.outdent()
                 print(f"{helper.spaces()})")
+            if item[0] == "returnState()":
+                if item[1] != None:
+                    ExpressionTree.printExprAST(item[1])
 
 class ExpressionTree:
     def createExpressionTree(prod, tree):
@@ -171,7 +177,8 @@ class ExpressionTree:
         return statement
     
     def printExprAST(tree):
-        print(f"{helper.spaces()}{tree[0]}")
+        if tree[0] == "expr()":
+            return f"({tree[1]})"
 
 class OperatorTree:
     def Operator(op):
